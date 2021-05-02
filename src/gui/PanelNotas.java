@@ -7,8 +7,11 @@ import java.awt.GridBagLayout;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,16 +27,18 @@ import model.Estudiante;
 import model.Materia;
 import model.Profesor;
 import model.Tipologiasexo;
+import model.Valoracionmateria;
+import model.entities.controllers.ControladorEstudiantes;
 import model.entities.controllers.ControladorMateria;
 import model.entities.controllers.ControladorProfesores;
+import model.entities.controllers.ControladorValoracionMateria;
 
 public class PanelNotas extends JPanel {
 	private JScrollPane scrollPane;
-	PanelSeleccion p = new PanelSeleccion();
 	private JComboBox jcbMateria;
 	private JComboBox jcbProfesor;
 	private Materia actual = new Materia();
-	
+	JTextField jtfNota;
 	
 
 	/**
@@ -47,9 +52,9 @@ public class PanelNotas extends JPanel {
 		private void initialize() {
 		GridBagLayout gridBagLayout = new GridBagLayout();
 		gridBagLayout.columnWidths = new int[]{0, 0};
-		gridBagLayout.rowHeights = new int[]{73, 0, 99, 0, 0, 0};
+		gridBagLayout.rowHeights = new int[]{93, 156, 0, 0, 0};
 		gridBagLayout.columnWeights = new double[]{1.0, Double.MIN_VALUE};
-		gridBagLayout.rowWeights = new double[]{1.0, 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
+		gridBagLayout.rowWeights = new double[]{1.0, 0.0, 0.0, 0.0, Double.MIN_VALUE};
 		setLayout(gridBagLayout);
 		
 		JPanel panel = new JPanel();
@@ -105,25 +110,58 @@ public class PanelNotas extends JPanel {
 		gbc_btnRefrescar.gridy = 1;
 		panel.add(btnRefrescar, gbc_btnRefrescar);
 		
-		scrollPane = new JScrollPane();
-        GridBagConstraints gbc_scrollAlumnos = new GridBagConstraints();
-        gbc_scrollAlumnos.insets = new Insets(0, 0, 5, 0);
-        gbc_scrollAlumnos.gridwidth = 3;
-        gbc_scrollAlumnos.fill = GridBagConstraints.BOTH;
-        gbc_scrollAlumnos.gridx = 0;
-        gbc_scrollAlumnos.gridy = 2;
-        add(scrollPane, gbc_scrollAlumnos);
+        btnRefrescar.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent arg0) {
+                scrollPane.setViewportView(getP());
+
+            }
+        });
+		
 
 
-        // se inserta un panel de un estudiante
-        this.scrollPane.setViewportView(p);
+        scrollPane = new JScrollPane();
+		GridBagConstraints gbc_scrollAlumnos = new GridBagConstraints();
+		gbc_scrollAlumnos.insets = new Insets(0, 0, 5, 0);
+		gbc_scrollAlumnos.gridwidth = 3;
+		gbc_scrollAlumnos.fill = GridBagConstraints.BOTH;
+		gbc_scrollAlumnos.gridx = 0;
+		gbc_scrollAlumnos.gridy = 1;
+		scrollPane.setPreferredSize(new Dimension(300, 300));
+		add(scrollPane, gbc_scrollAlumnos);
 
         JButton btnGuardar = new JButton("Guardar las notas de todos los alumnos");
         GridBagConstraints gbc_btnNewButton_1 = new GridBagConstraints();
+        gbc_btnNewButton_1.insets = new Insets(0, 0, 5, 0);
         gbc_btnNewButton_1.gridx = 2;
-        gbc_btnNewButton_1.gridy = 3;
+        gbc_btnNewButton_1.gridy = 2;
         add(btnGuardar, gbc_btnNewButton_1);
         
+        
+        btnGuardar.addActionListener(new ActionListener() {
+
+			public void actionPerformed(ActionEvent e) {
+
+				List<Estudiante> estudiantes = ControladorEstudiantes.getInstance().findAll();
+				Profesor p = (Profesor) jcbProfesor.getSelectedItem();
+				Materia m = (Materia) jcbMateria.getSelectedItem();
+
+				for (Estudiante estudiante : estudiantes) {
+					Valoracionmateria vm = ControladorValoracionMateria.getInstancia().findEstProfMat(p, m, estudiante);
+
+					if (vm != null) {
+						vm.setValoracion(Float.parseFloat(jtfNota.getText()));
+						ControladorValoracionMateria.getInstancia().borrar(vm);
+					} else {
+						Valoracionmateria v = new Valoracionmateria();
+						v.setEstudiante(estudiante);
+						v.setMateria(m);
+						v.setProfesor(p);
+						ControladorValoracionMateria.getInstancia().guardar(v);
+					}
+				}
+			}
+
+		});
 
 	}
 	
@@ -141,6 +179,39 @@ public class PanelNotas extends JPanel {
         }
 
     }
+	
+	public JPanel getP() {
+
+		JPanel panel = new JPanel();
+		panel.setLayout(new GridBagLayout());
+		GridBagConstraints c = new GridBagConstraints();
+
+		int i = 1;
+		List<Estudiante> estudiantes = ControladorEstudiantes.getInstance().findAll();
+		for (Estudiante estudiante : estudiantes) {
+
+			c.fill = GridBagConstraints.BOTH;
+			c.gridx = 0;
+			c.gridy = 0 + i;
+			c.gridwidth = 1;
+			c.anchor = GridBagConstraints.EAST;
+			c.insets = new Insets(2, 2, 2, 2);
+			panel.add(new JLabel(estudiante.toString()), c);
+
+			c.gridx = 1;
+			c.gridy = 0 + i;
+			c.anchor = GridBagConstraints.WEST;
+			panel.add(new JTextField(), c);
+
+			Valoracionmateria vm = ControladorValoracionMateria.getInstancia().findEstProfMat(
+					(Profesor) this.jcbProfesor.getSelectedItem(), (Materia) this.jcbMateria.getSelectedItem(),
+					estudiante);
+
+			i++;
+		}
+
+		return panel;
+	}
 }
 	
 	

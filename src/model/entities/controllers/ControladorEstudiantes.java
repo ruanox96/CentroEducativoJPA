@@ -1,5 +1,7 @@
 package model.entities.controllers;
 
+import java.util.List;
+
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.Persistence;
@@ -128,5 +130,15 @@ public class ControladorEstudiantes {
 		em.remove(e);
 		em.getTransaction().commit();
 		em.close();
+	}
+	
+	public List<Estudiante> findAll () {
+		EntityManager em = factory.createEntityManager();
+		
+		Query q = em.createNativeQuery("SELECT * FROM estudiante", Estudiante.class);
+		
+		List<Estudiante> list = (List<Estudiante>) q.getResultList();
+		em.close();
+		return list;
 	}
 }

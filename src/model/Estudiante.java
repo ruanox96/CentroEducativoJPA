@@ -158,5 +158,9 @@ public class Estudiante implements Serializable {
 
 		return valoracionmateria;
 	}
+	
+	public String toString() {
+		return nombre + apellido1 + apellido2 ;
+	}
 
 }
