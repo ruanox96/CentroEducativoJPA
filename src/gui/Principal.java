@@ -30,7 +30,7 @@ public class Principal extends JFrame {
 	 */
 	public Principal() {
 		super("Datos");
-		this.setBounds(0, 0, 600, 400);
+		this.setBounds(0, 0, 700, 400);
 		
 		this.setJMenuBar(new MenuBar());
 		
@@ -45,8 +45,8 @@ public class Principal extends JFrame {
 	private JTabbedPane getPanelPrincipal() {
 		jTabbedPane = new JTabbedPane();
 		
-		jTabbedPane.add("Estudiante", new PanelDatosEstudiante());
-		jTabbedPane.add("Profesores", new PanelDatosProfesores());
+		jTabbedPane.add("Estudiante", new PanelEstudiantes());
+		jTabbedPane.add("Profesores", new PanelProfesores());
 		
 		
 		return jTabbedPane;
